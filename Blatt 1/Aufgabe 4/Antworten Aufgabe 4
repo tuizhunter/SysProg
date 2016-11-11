@@ -1,0 +1,17 @@
+Aufgabe 4:
+
+a)
+
+Speicher an i wird in jeder Schleife neu zugewiesen allerdings nur einmal wieder freigegeben
+
+b)
+
+i ist nicht definiert -> soll wohl d heißen
+d[2] ist ein Überlauf, da arrayartig zugegriffen wird d[0] == *d, d[1]==*(d+1).
+
+c)
+
+Speicher in Größe von 2-dimensionalem Array erstellt.
+Versuch der Zuweisung von integer an Speichergröße, welche 2dim Array- fasst
+
+

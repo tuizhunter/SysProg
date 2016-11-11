@@ -1,0 +1,3 @@
+int number wird nicht mit ";" abgeschlossen;
+scanf muss die eingelesene Zahl an die Adresse von number 1/number2 schreiben
+printf benötigt die Adressen der Zahlen
