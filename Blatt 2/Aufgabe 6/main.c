@@ -136,8 +136,10 @@ int main(){
 
 
 	}
+	//Auswahl der Kriterien
 	printf("Geben Sie an, welches Kriterium Sie wählen möchten: 1 = Alphabetisch/Nachnamen, 2 = Geburtsdaten, 3 = Wohnorte\n");
 	scanf("%d", &decidef);
+	//anpassen auf Nummer der Kriterien in Funktionen-Array zusweisen, Matrix Kriterien und Offsetarray
 	decidef--;
 	int ist = 1;
 	//Ordne alle Namen in Liste ein

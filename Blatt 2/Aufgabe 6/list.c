@@ -10,18 +10,31 @@ struct node* list_init(struct node* head){	//Liste starten
          	fprintf(stderr, "Kein Speicherplatz vorhanden "
                          "fuer anfang\n");}
 	}
+	return head;
 }
 
 
-struct node* list_add(struct node* last, struct node* follow){	//Element sortiert einfügen
-	if(last==NULL){														//Prüfung ob Liste leer
-		if((last =
+struct node* list_add(struct node* last, struct node* new, struct node* follow){	//Element sortiert einfügen
+	if(new==NULL){														//Prüfung ob Liste leer
+		if((new =
        		malloc(sizeof(struct node))) == NULL) {
          	fprintf(stderr, "Kein Speicherplatz vorhanden "
                          "fuer anfang\n");}
 	}
-	last->succ= follow;
-    return last;														//gebe alten Kopf zurück
+	//Falls es noch ein weiteres Element in Liste gibt, dann setzte succ auf dieses
+	if(follow!=NULL){
+		new->succ= follow;
+	}
+	//Falls es kin weiteres Element in Liste gibt, dann setzte succ auf NULL
+	if(follow==NULL){
+		new->succ= NULL;
+	}
+	//Falls es ein Element in Liste vor new gibt, dann setzte las->succ auf new
+	if(last!=NULL){
+		last->succ=new;
+	}
+	//gebe das neue Element new zurück
+    return new;													
 }
 
 void list_print(struct node* head){										//gebe Liste aus

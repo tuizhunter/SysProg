@@ -7,5 +7,5 @@ OBJ = main.o list.o ownstring.o
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 
-springer: $(OBJ)
+sort.out: $(OBJ)
 	gcc -o $@ $^ $(CFLAGS)

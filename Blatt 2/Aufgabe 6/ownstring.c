@@ -105,7 +105,9 @@ int geburtstag(struct node* head, char** kriterien, int decidek, int* offset, in
 					if(geb[2]==zeiger->geburt[2]){
 						if(geb[3]==zeiger->geburt[3]){
 							if(geb[0]==zeiger->geburt[0]){
-								if(geb[1]==zeiger->geburt[1]){
+								//falls auch gleich und die Bedingung Wohnort noch nicht geprüft wurde (ist >= 0)
+								if(geb[1]==zeiger->geburt[1]&& ist>=0){
+									//geburtsdaten komplett gleich, nimm wohnort als Hilfe hinzu
 									x= wohnort(head, kriterien, decidek, offset, -1);
 								}
 							}
@@ -115,7 +117,7 @@ int geburtstag(struct node* head, char** kriterien, int decidek, int* offset, in
 			}
 		}
 	}
-	//falls alle Klauses übersprungen werden
+	//falls alle Klauses übersprungen werden: Füge neues vorher ein
 	else {
 		x= 1;
 
@@ -281,7 +283,10 @@ char* read(int *z){
 	printf("Bitte geben Sie den Datenpfad des Textfiles ein\n");
 	char filename[999];
 	fgets(filename, 998, stdin);
-	FILE *namefile = fopen(filename, "r");	
+	printf("%s", filename);
+	char* trans = &filename[0];
+	printf("%s", trans);
+	FILE *namefile = fopen(trans, "r");	
 	//FILE *namefile = fopen("/home/marcel/Schreibtisch/Blatt1/test", "r");	
 	if(namefile==NULL){							//Fehler beim Öffnen des Files
 		perror("Error opening file\n");
@@ -294,6 +299,7 @@ char* read(int *z){
 		charcount+=charcount;				
 		putchar(ch);						//Gebe Zeichen auf Konsole aus
 	}
+	//erstelle Hilfsarray Personen, das komplette Daten fasst
 	char* personen;
 	charcount = charcount +1;
 	char* buffer = (char*)malloc(sizeof(char)*charcount);
@@ -336,6 +342,7 @@ char* read(int *z){
 
 
 	}
+	//gebe Länge des Array personen mit zurück
 	*z = j;
 	free(buffer);
 	fclose(namefile);
@@ -344,53 +351,102 @@ char* read(int *z){
 
 struct node* zuweisen(int (*sortFunction[])(struct node*, char**, int, int*, int),struct node* head, char** kriterien, int decidek, int* offset, int ist, int decidef){
 		struct node* test=NULL;
+		//Merke alte Offsets
+		int o1 = offset[0];
+		int o2 = offset[1];
+		int o3 = offset[2];
+		int o4 = offset[3];
+		//setzte char-pointer auf anfang der kriterien
+		char* vorname = kriterien[0]+offset[0];
+		char* nachname = kriterien[1]+offset[1];
+		char* geburt = kriterien[2]+offset[2];
+		char* wohnort = kriterien[3]+offset[3];
+		//berechne neue Offsets und Kopieren der Arrayinhalte in dafür neu konstruierte Char-Arrays
+		int z=0;
+		char w = nachname[0];
+		while(w!='\0'&& w!='#'){									
+			w= nachname[z];
+			z++;
+		}
+		offset[1] = offset[1]+z+1;
+		//erstelle Array der richtigen Größe für Nachname und kopiere ihn dann
+		nachname = malloc(sizeof(char)*(offset[1]-(o2+1)));
+		for(int g=0;g<z;g++){
+			nachname[z]= kriterien[0][z+o2];
+		}		
+		z=0;
+		w = wohnort[0];
+		while(w!='\0'&& w!='#'){									
+			w= wohnort[z];
+			z++;
+		}
+		offset[3] = offset[3]+z+1;
+		//erstelle Array der richtigen Größe für Wohnort und kopiere ihn dann
+		wohnort = malloc(sizeof(char)*(offset[3]-(o4+1)));
+		for(int g=0;g<z;g++){
+			wohnort[z]= kriterien[3][z+o4];
+		}	
+		w = vorname[0];
+		z =0;
+		while(w!='\0'&& w!='#'){									
+			w= vorname[z];
+			z++;
+		}
+		offset[0] = offset[0]+z+1;
+		//erstelle Array der richtigen Größe für Vorname und kopiere ihn dann
+		vorname = malloc(sizeof(char)*(offset[0]-(o1+1)));
+		for(int g=0;g<z;g++){
+			wohnort[z]= kriterien[0][z+o1];
+		}	
+		offset[2]=offset[2]+7;
+		//erstelle Array der richtigen Größe für Wohnort und kopiere ihn dann
+		geburt = malloc(sizeof(char)*(6));
+		for(int g=0;g<z;g++){
+			wohnort[z]= kriterien[2][z+o3];
+		}
+		//stelle alte Offsets wieder her und merke die neuen Offsets
+		int hilf;
+		hilf=offset[0];
+		offset[0]=o1;
+		o1=hilf;
+		hilf=offset[1];
+		offset[1]=o2;
+		o2=hilf;
+		hilf=offset[2];
+		offset[2]=o3;
+		o3=hilf;
+		hilf=offset[3];
+		offset[3]=o4;
+		o4=hilf;
+
+		//falls es noch keine Liste gibt, soll diese hier mit den ersten Werten initialisiert werden
 	if(head==NULL){
 		test = list_init(test);
-		test->vorname = kriterien[0]+offset[0];
-		test->nachname = kriterien[1]+offset[1];
-		test->geburt = kriterien[2]+offset[2];
-		test->wohnort = kriterien[3]+offset[3];
+		test->vorname = vorname;
+		test->nachname = nachname;
+		test->geburt = geburt;
+		test->wohnort = wohnort;
 		test->succ = NULL;
 		head = test;
 	}
 	//Testen, ob einfügen zu Beginn der Liste
 	else{
-		//Werte zwischenspeichern, da nach sort-Funktion der Offset bereits angepasst wurde
-		char* vorname = kriterien[0]+offset[0];
-		char* nachname = kriterien[1]+offset[1];
-		char* geburt = kriterien[2]+offset[2];
-		char* wohnort = kriterien[3]+offset[3];
 		if(sortFunction[decidef](head, kriterien, decidek, offset, ist)== 1){
 			struct node *newhead = NULL;
-			newhead = list_add(newhead, head);
+			struct node *dummy = NULL;
+			newhead = list_add(dummy, newhead, head);
 			newhead->vorname=vorname;
 			newhead->nachname=nachname;
 			newhead->geburt=geburt;
 			newhead->wohnort=wohnort;
 			newhead->succ=head;
 			//passe offsets an
-			int z=0;
-			char w = nachname[0];
-			while(w!='\0'&& w!='#'){									
-				w= nachname[z];
-				z++;
-			}
-			offset[1] = offset[1]+z+1;
 			z=0;
-			w = wohnort[0];
-			while(w!='\0'&& w!='#'){									
-				w= wohnort[z];
-				z++;
-			}
-			offset[3] = offset[3]+z+1;
-			w = vorname[0];
-			z =0;
-			while(w!='\0'&& w!='#'){									
-				w= vorname[z];
-				z++;
-			}
-			offset[0] = offset[0]+z+1;
-			offset[2]=offset[2]+7;
+			//passe Offsets an
+			o1 = offset[0];
+			o2 = offset[1];
+			o3 = offset[2];
+			o4 = offset[3];
 
 			head = newhead;
 
@@ -406,76 +462,33 @@ struct node* zuweisen(int (*sortFunction[])(struct node*, char**, int, int*, int
 		//füge neues Elemement in Mitten der Liste ein
 		if(zeiger!=NULL){
 			struct node *newel = NULL;
-			newel = list_add(point, newel);
-			newel->vorname=kriterien[0]+offset[0];
+			newel = list_add(point, newel, zeiger);
+			newel->vorname=vorname;
 			newel->nachname=nachname;
 			newel->geburt=geburt;
 			newel->wohnort=wohnort;
-			newel->succ=zeiger;
-			//passe offsets an
-			int z=0;
-			char w = nachname[0];
-			while(w!='\0'&& w!='#'){									
-				w= nachname[z];
-				z++;
-			}
-			offset[1] = offset[1]+z+1;
-			z=0;
-			w = wohnort[0];
-			while(w!='\0'&& w!='#'){									
-				w= wohnort[z];
-				z++;
-			}
-			offset[3] = offset[3]+z+1;
-			w = vorname[0];
-			z =0;
-			while(w!='\0'&& w!='#'){									
-				w= vorname[z];
-				z++;
-			}
-			offset[0] = offset[0]+z+1;
-			offset[2]=offset[2]+7;
-
-
-													//gebe neuen Kopf zurück
+			//passe Offsets an
+			o1 = offset[0];
+			o2 = offset[1];
+			o3 = offset[2];
+			o4 = offset[3];
 		}
 
 		//füge neues Element am Ende der Liste ein
 		if(zeiger==NULL){
 			struct node *newel = NULL;
-			newel = list_add(point, newel);
-			newel->vorname=kriterien[0]+offset[0];
+			newel = list_add(point, newel, zeiger);
+			newel->vorname=vorname;
 			newel->nachname=nachname;
 			newel->geburt=geburt;
 			newel->wohnort=wohnort;
-			newel->succ=NULL;
-			//passe offsets an
-			int z=0;
-			char w = nachname[0];
-			while(w!='\0'&& w!='#'){									
-				w= nachname[z];
-				z++;
-			}
-			offset[1] = offset[1]+z+1;
-			z=0;
-			w = wohnort[0];
-			while(w!='\0'&& w!='#'){									
-				w= wohnort[z];
-				z++;
-			}
-			offset[3] = offset[3]+z+1;
-			w = vorname[0];
-			z =0;
-			while(w!='\0'&& w!='#'){									
-				w= vorname[z];
-				z++;
-			}
-			offset[0] = offset[0]+z+1;
-			offset[2]=offset[2]+7;
-
-
-														//gebe neuen Kopf zurück
+			//passe Offsets an
+			o1 = offset[0];
+			o2 = offset[1];
+			o3 = offset[2];
+			o4 = offset[3];
 		}
 	}
+	//gebe Kopf zurück
 	return head;
 }
